@@ -3,7 +3,7 @@
 30 RUN AT 3
 50 LET vidas=2
 60 LET score=0
-80 LET x=60:y=81: REM Posicion nave
+80 LET x=35:y=116: REM Posicion nave
 
 90 driverok= PEEK 64000
 100 IF driverok=1 THEN .uninstall"ayfx.drv"
@@ -39,8 +39,8 @@
 350 PROC lives(0)
 360 FOR i=0 TO 20000: REM Despazamos el Layer a lo largo del TilesMap
 361 if l=1 then if % sprite 71=0 then proc mensajevidas()
-390 if %sprite 71=0 then proc movlayer()
-400 if %sprite 71=0 then PROC movimiento()
+390 if l=0 then proc movlayer()
+400 if l=0 then PROC movimiento()
 410 IF i > 0 AND i < 50 THEN PROC crearene(1,6)
 412 IF i > 100 AND i < 150 THEN PROC crearene(2,19)
 413 IF i > 200 AND i < 250 THEN PROC crearene(3,20)
@@ -57,8 +57,8 @@
 515 PROC impacmuro()
 516 proc impacnave()
 517 rem if %sprite 71=0 and l=1 then proc mensajevidas()
-518 rem print at 12,12;l
-519 rem print at 10,10;%sprite 71
+518 rem print at 12,12;x
+519 rem print at 10,10;y
 525 SPRITE MOVE
 530 NEXT i
 540 REM ************fin bucle juego***************
@@ -235,16 +235,13 @@
 2060 IF %i > 29 THEN SPRITE %i,,,, BIN 0000000
 2070 NEXT %u
 2080 ENDPROC
-8000 REM vuelta a empezar
-8010 PAUSE 50
-8020 GO TO 10
 9000 defproc mensajevidas()
 9010 local x:local t1:local t2
-9012 IF vidas < 0 THEN PRINT AT 12,12;"GAME OVER": pause 220:goto 12000
 9015 t1=(65536 * PEEK 23674 + 256 * PEEK 23673+ PEEK 23672) / 50
 9120 repeat
 9121 t2=(65536 * PEEK 23674 + 256 * PEEK 23673+ PEEK 23672) / 50
-9122 layer at 0,0:PRINT at 10,6;"YOU HAVE LOST A LIFE"
-9123 repeat until t2-t1>5
-9150 l=0:sprite 99,,,,1
+9122 if vidas>=0 then layer at 0,0:PRINT at 10,6;"YOU HAVE LOST A LIFE"
+9123 IF vidas<0 THEN PRINT AT 10,10;"GAME OVER"
+9125 repeat until t2-t1>5
+9150 l=0:x=35:y=116:sprite 99,,,,1
 9500 endproc
