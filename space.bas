@@ -4,9 +4,11 @@
 50 LET vidas=2
 60 LET score=0
 80 LET x=60:y=81: REM Posicion nave
+
 90 driverok= PEEK 64000
 100 IF driverok=1 THEN .uninstall"ayfx.drv"
 110 .install "ayfx.drv"
+115 rem clear 63999
 120 POKE 64000,1
 130 DRIVER 49,1,22
 140 LOAD "sound.afb" BANK 22
@@ -14,7 +16,7 @@
 160 LET n=1
 170 LET s=0
 175 LET bossdie=0
-178 LET playerdie=0
+178 LET l=0:rem Muerte del player
 180 LET eneboss=10
 190 LET %i=0
 200 LET d=51: REM Sprite disparos enemigos desde el 51 hasta el 100
@@ -30,16 +32,15 @@
 300 LET g=0: REM LAYER
 301 LET %e=0:REM PLAYER EN EXPLOSION
 310 SPRITE 99,x,y,4,1
+
 320 REM **********BLOQUE DE LOOP DE JUEGO*********
 330 PROC crearmuro()
 340 PROC puntos(0)
 350 PROC lives(0)
 360 FOR i=0 TO 20000: REM Despazamos el Layer a lo largo del TilesMap
-365 %e=% sprite 71
-370 REM PROC debugsprites()
-380 IF %e=0 THEN PROC impacnave()
-390 IF %e=0 then PROC movlayer()
-400 IF %e=0 THEN PROC movimiento()
+361 if l=1 then if % sprite 71=0 then proc mensajevidas()
+390 if %sprite 71=0 then proc movlayer()
+400 if %sprite 71=0 then PROC movimiento()
 410 IF i > 0 AND i < 50 THEN PROC crearene(1,6)
 412 IF i > 100 AND i < 150 THEN PROC crearene(2,19)
 413 IF i > 200 AND i < 250 THEN PROC crearene(3,20)
@@ -54,8 +55,11 @@
 500 IF eneboss < 0 AND bossdie=0 THEN PROC endlevel()
 510 IF % SPRITE 113=0 THEN IF bossdie=1 THEN DRIVER 49,2,53: PRINT AT 10,10;"OLE con OLE": PAUSE 0: GO TO 8000
 515 PROC impacmuro()
-520 SPRITE MOVE
-525 PRINT AT 4,30;%e
+516 proc impacnave()
+517 rem if %sprite 71=0 and l=1 then proc mensajevidas()
+518 rem print at 12,12;l
+519 rem print at 10,10;%sprite 71
+525 SPRITE MOVE
 530 NEXT i
 540 REM ************fin bucle juego***************
 550 DEFPROC movimiento(): REM RUTINA DE MOVIMIENTO
@@ -125,7 +129,7 @@
 1125 LOCAL %s:%s=% SPRITE OVER (99,30 TO 65,0,7)
 1126 local x:local y
 1127 x=%sprite at (99,0):y=%sprite at (99,1)
-1130 IF %s > 0 THEN DRIVER 49,2,18: SPRITE %s,,,,0: SPRITE 71,x,y,38, BIN 00000001: SPRITE 99,,,,0: SPRITE CONTINUE 71,x run,y RUN,31 TO 41, BIN 00100000,1: PROC lives(1): FOR %s=30 TO 65: SPRITE %s,,,,0:NEXT %s:proc restart()
+1130 IF %s > 0 THEN DRIVER 49,2,18: SPRITE %s,,,,0: SPRITE 71,x,y,38, BIN 00000001: SPRITE 99,,,,0: SPRITE CONTINUE 71,x run,y RUN,31 TO 41, BIN 00100000,1: PROC lives(1): FOR %s=30 TO 65: SPRITE %s,,,,0:NEXT %s:FOR %s=1 TO 6: SPRITE %s,,,,0:NEXT %s:l=1
 1140 ENDPROC
 1150 DEFPROC mov3(%s,s)
 1151 LOCAL x: LOCAL y
@@ -152,13 +156,12 @@
 1370 SPRITE 18,132,16,%s MOD 10+9,1
 1380 ENDPROC
 1390 DEFPROC lives(x)
-1400 IF vidas < 0 THEN PRINT AT 12,12;"GAME OVER": STOP
 1410 IF x=1 THEN vidas=vidas-x
 1420 SPRITE 24,,,,0
 1430 SPRITE 25,,,,0
 1440 SPRITE 26,,,,0
 1450 LOCAL i:i=vidas
-1460 IF vidas > 0 THEN SPRITE 24+i,20+i*16,16,8,1
+1460 IF vidas >= 0 THEN SPRITE 24+i,20+i*16,16,8,1
 1470 IF i > 0 THEN i=i-1: GO TO %1460
 1480 IF x <> 0 THEN IF % SPRITE 71=0 THEN DRIVER 49,2,8: GO TO %80
 1490 ENDPROC
@@ -235,10 +238,13 @@
 8000 REM vuelta a empezar
 8010 PAUSE 50
 8020 GO TO 10
-9000 defproc restart()
-9010 local x
-9100 repeat
-9105 sprite 99,,,,0
-9106 repeat until %e=0
-9107 sprite stop
+9000 defproc mensajevidas()
+9010 local x:local t1:local t2
+9012 IF vidas < 0 THEN PRINT AT 12,12;"GAME OVER": pause 220:goto 12000
+9015 t1=(65536 * PEEK 23674 + 256 * PEEK 23673+ PEEK 23672) / 50
+9120 repeat
+9121 t2=(65536 * PEEK 23674 + 256 * PEEK 23673+ PEEK 23672) / 50
+9122 layer at 0,0:PRINT at 10,6;"YOU HAVE LOST A LIFE"
+9123 repeat until t2-t1>5
+9150 l=0:sprite 99,,,,1
 9500 endproc
